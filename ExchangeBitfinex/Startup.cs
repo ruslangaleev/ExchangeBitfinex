@@ -26,9 +26,6 @@ namespace ExchangeBitfinex
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             var dbConnectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddEntityFrameworkSqlServer()
                 .AddDbContext<ApplicationDbContext>(options =>
@@ -85,9 +82,9 @@ namespace ExchangeBitfinex
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            new BitfinexHandler(Configuration,
-                serviceProvider.GetRequiredService<IBitfinexClient>(),
-                serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
+            //new BitfinexHandler(Configuration,
+            //    serviceProvider.GetRequiredService<IBitfinexClient>(),
+            //    serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
         }
     }
 }

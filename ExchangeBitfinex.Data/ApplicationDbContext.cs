@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ExchangeBitfinex.Models;
 using ExchangeBitfinex.Data.Infrastructure;
+using ExchangeBitfinex.Data.Models;
 
 namespace ExchangeBitfinex.Data
 {
@@ -19,5 +20,7 @@ namespace ExchangeBitfinex.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<CurrencyInfo> CurrencyInfos { get; set; }
     }
 }
