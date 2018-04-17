@@ -1,0 +1,8 @@
+﻿# Ignore folder .vs
+**/.vs/
+
+# Ignore folder bin
+**/bin/
+
+# Ignore folder obj
+**/obj/
