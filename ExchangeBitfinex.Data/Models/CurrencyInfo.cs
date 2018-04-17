@@ -20,6 +20,6 @@ namespace ExchangeBitfinex.Data.Models
         /// <summary> 
         /// Время последнего изменения валюты 
         /// </summary> 
-        public DateTime TimeStamp { get; set; }
+        public DateTime DateTime { get; set; }
     }
 }
