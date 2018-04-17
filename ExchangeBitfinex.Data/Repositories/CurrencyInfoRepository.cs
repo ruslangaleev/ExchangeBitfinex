@@ -83,7 +83,7 @@ namespace ExchangeBitfinex.Data.Repositories
 
             return await _currencyInfos
                 .Where(where)
-                .Skip(pageNumber * pageSize)
+                .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }

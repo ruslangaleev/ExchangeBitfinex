@@ -54,7 +54,11 @@ namespace ExchangeBitfinex
             services.AddScoped<IBitfinexClient, BitfinexClient>();
             services.AddScoped<ICurrencyInfoRepository, CurrencyInfoRepository>();
 
-            services.AddMvc();
+            services
+                .AddMvcCore()
+                .AddJsonFormatters();
+                //.AddAuthorization();
+                //.AddApiExplorer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,7 +77,7 @@ namespace ExchangeBitfinex
 
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
@@ -82,9 +86,9 @@ namespace ExchangeBitfinex
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            //new BitfinexHandler(Configuration,
-            //    serviceProvider.GetRequiredService<IBitfinexClient>(),
-            //    serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
+            new BitfinexHandler(Configuration,
+                serviceProvider.GetRequiredService<IBitfinexClient>(),
+                serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
         }
     }
 }

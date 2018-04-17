@@ -30,7 +30,7 @@ namespace ExchangeBitfinex.Services.Services
         {
             while (true)
             {
-                Worker();
+                await Worker();
                 Thread.Sleep((int)TimeSpan.FromMinutes(_timeOutInMinutes).TotalMilliseconds);
             }
         }
