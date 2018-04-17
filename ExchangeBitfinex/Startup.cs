@@ -8,6 +8,7 @@ using ExchangeBitfinex.Data;
 using ExchangeBitfinex.Models;
 using System.Reflection;
 using System;
+using ExchangeBitfinex.Data.Infrastructure;
 
 namespace ExchangeBitfinex
 {
@@ -46,7 +47,9 @@ namespace ExchangeBitfinex
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-            
+
+            services.AddScoped<IStorageContext, ApplicationDbContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddMvc();
         }
