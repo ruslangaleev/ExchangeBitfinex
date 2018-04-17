@@ -1,4 +1,5 @@
 ﻿using ExchangeBitfinex.Data.Models;
+using ExchangeBitfinex.Services.Resources;
 using ExchangeBitfinex.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Controllers
 {
-    [Route("api")]
+    [Route("api/currency")]
     public class CurrencyInfoController : Controller
     {
         private readonly ICurrencyInfoManager _currencyInfoManager;
@@ -17,16 +18,22 @@ namespace ExchangeBitfinex.Controllers
             _currencyInfoManager = currencyInfoManager ?? throw new ArgumentNullException(nameof(ICurrencyInfoManager));
         }
 
-        [HttpPost("currency")]
+        [HttpGet]
         public async Task<object> GetPageList(CurrencyType currencyType, int pageNumber, int pageSize)
         {
-            (int count, IEnumerable<CurrencyInfo> list) = await _currencyInfoManager.GetPageList(currencyType, pageNumber, pageSize);
-
+            (int total, IEnumerable<CurrencyInfoResource> list) = await _currencyInfoManager.GetPageList(currencyType, pageNumber, pageSize);
+            
             return new
             {
-                count,
+                total,
                 list
             };
+        }
+
+        [HttpGet("avg")]
+        public async Task<object> GetAvgDataLastDay()
+        {
+            return await _currencyInfoManager.GetAvgDataLastDay();
         }
     }
 }

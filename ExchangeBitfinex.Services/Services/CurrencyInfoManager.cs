@@ -13,7 +13,7 @@ namespace ExchangeBitfinex.Services.Services
     {
         Task AddCurrencyInfo(CurrencyInfo currencyInfo);
 
-        Task<(int, IEnumerable<CurrencyInfo>)> GetPageList(CurrencyType currencyType, int pageNumber = 1, int pageSize = 50);
+        Task<(int, IEnumerable<CurrencyInfoResource>)> GetPageList(CurrencyType currencyType, int pageNumber = 1, int pageSize = 50);
 
         Task<IEnumerable<AvgData>> GetAvgDataLastDay();
     }
@@ -48,12 +48,22 @@ namespace ExchangeBitfinex.Services.Services
             });
         }
 
-        public async Task<(int, IEnumerable<CurrencyInfo>)> GetPageList(CurrencyType currencyType, int pageNumber = 1, int pageSize = 50)
+        public async Task<(int, IEnumerable<CurrencyInfoResource>)> GetPageList(CurrencyType currencyType, int pageNumber = 1, int pageSize = 50)
         {
             var total = await _currencyInfoRepository.Count(t => t.CurrencyType == currencyType);
             var list = await _currencyInfoRepository.Get(t => t.CurrencyType == currencyType, pageNumber, pageSize);
 
-            return (total, list);
+            List<CurrencyInfoResource> result = new List<CurrencyInfoResource>();
+            foreach(var entry in list)
+            {
+                result.Add(new CurrencyInfoResource
+                {
+                    LastPrice = entry.LastPrice,
+                    DateTime = entry.DateTime.ToString("dd.MM.yyyy hh:mm:ss")
+                });
+            }
+
+            return (total, result);
         }
     }
 }

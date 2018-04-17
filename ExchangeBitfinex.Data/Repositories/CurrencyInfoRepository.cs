@@ -24,6 +24,7 @@ namespace ExchangeBitfinex.Data.Repositories
         /// </summary> 
         Task<IEnumerable<CurrencyInfo>> Get(Expression<Func<CurrencyInfo, bool>> where = null);
 
+        // TODO: добавить order by
         Task<IEnumerable<CurrencyInfo>> Get(Expression<Func<CurrencyInfo, bool>> where = null, int pageNumber = 1, int pageSize = 50);
 
         Task<int> Count(Expression<Func<CurrencyInfo, bool>> where = null);
@@ -85,6 +86,7 @@ namespace ExchangeBitfinex.Data.Repositories
                 .Where(where)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .OrderByDescending(t => t.DateTime) // TODO: добавить order by
                 .ToListAsync();
         }
     }
