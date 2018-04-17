@@ -11,6 +11,10 @@ using System;
 using ExchangeBitfinex.Data.Infrastructure;
 using ExchangeBitfinex.Services.Services;
 using ExchangeBitfinex.Data.Repositories;
+using Microsoft.IdentityModel.Tokens;
+using ExchangeBitfinex.Resources;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 
 namespace ExchangeBitfinex
 {
@@ -43,6 +47,38 @@ namespace ExchangeBitfinex
                 ServiceLifetime.Scoped
             );
 
+            var authOptions = Configuration.GetValue<AuthOptions>("AuthOptions");
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    //.AddAuthentication(o =>
+                    //{
+                    //    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    //    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    //    o.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+                    //})
+                    .AddJwtBearer(options =>
+                    {
+                        options.RequireHttpsMetadata = false;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            // укзывает, будет ли валидироваться издатель при валидации токена 
+                            ValidateIssuer = true,
+                            // строка, представляющая издателя 
+                            ValidIssuer = authOptions.Issuer,
+
+                            // будет ли валидироваться потребитель токена 
+                            ValidateAudience = true,
+                            // установка потребителя токена 
+                            ValidAudience = authOptions.Audience,
+                            // будет ли валидироваться время существования 
+                            ValidateLifetime = true,
+
+                            // установка ключа безопасности 
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authOptions.Key)),
+                            // валидация ключа безопасности 
+                            ValidateIssuerSigningKey = true
+                        };
+                    });
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -53,11 +89,12 @@ namespace ExchangeBitfinex
             services.AddScoped<ICurrencyInfoManager, CurrencyInfoManager>();
             services.AddScoped<IBitfinexClient, BitfinexClient>();
             services.AddScoped<ICurrencyInfoRepository, CurrencyInfoRepository>();
+            services.Configure<AuthOptions>(Configuration.GetSection("AuthOptions"));
 
             services
                 .AddMvcCore()
-                .AddJsonFormatters();
-                //.AddAuthorization();
+                .AddJsonFormatters()
+                .AddAuthorization();
                 //.AddApiExplorer();
         }
 
@@ -77,7 +114,7 @@ namespace ExchangeBitfinex
 
             app.UseStaticFiles();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {

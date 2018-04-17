@@ -1,6 +1,7 @@
 ﻿using ExchangeBitfinex.Data.Models;
 using ExchangeBitfinex.Services.Resources;
 using ExchangeBitfinex.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Controllers
 {
+    //[Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/currency")]
     public class CurrencyInfoController : Controller
     {
