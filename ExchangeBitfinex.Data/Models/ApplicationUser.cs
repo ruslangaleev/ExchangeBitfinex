@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ExchangeBitfinex.Models
 {
-    // Add profile data for application users by adding properties to the ApplicationUser class
+    /// <summary> 
+    /// Пользователь сервиса 
+    /// </summary> 
     public class ApplicationUser : IdentityUser
     {
     }
