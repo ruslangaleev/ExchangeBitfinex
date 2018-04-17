@@ -9,6 +9,8 @@ using ExchangeBitfinex.Models;
 using System.Reflection;
 using System;
 using ExchangeBitfinex.Data.Infrastructure;
+using ExchangeBitfinex.Services.Services;
+using ExchangeBitfinex.Data.Repositories;
 
 namespace ExchangeBitfinex
 {
@@ -50,12 +52,16 @@ namespace ExchangeBitfinex
 
             services.AddScoped<IStorageContext, ApplicationDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICurrencyInfoManager, CurrencyInfoManager>();
+            services.AddScoped<IBitfinexClient, BitfinexClient>();
+            services.AddScoped<ICurrencyInfoRepository, CurrencyInfoRepository>();
 
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -78,6 +84,10 @@ namespace ExchangeBitfinex
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            new BitfinexHandler(Configuration,
+                serviceProvider.GetRequiredService<IBitfinexClient>(),
+                serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
         }
     }
 }

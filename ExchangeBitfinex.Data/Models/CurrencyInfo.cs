@@ -7,6 +7,8 @@ namespace ExchangeBitfinex.Data.Models
     /// </summary> 
     public class CurrencyInfo
     {
+        public string CurrencyInfoId { get; set; }
+
         /// <summary> 
         /// Тип валюты 
         /// </summary> 

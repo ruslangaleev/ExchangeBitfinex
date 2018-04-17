@@ -38,8 +38,8 @@ namespace ExchangeBitfinex.Services.Services
                 var json = await response.Content.ReadAsStringAsync();
                 var responseBitfinex = JsonConvert.DeserializeObject<ResponseBitfinex>(json);
 
-                var lastPrice = decimal.Parse(responseBitfinex.last_price);
-                var timeStamp = double.Parse(responseBitfinex.timestamp);
+                var lastPrice = decimal.Parse(responseBitfinex.last_price.Replace('.', ','));
+                var timeStamp = double.Parse(responseBitfinex.timestamp.Replace('.', ','));
                 var dateTime = UnixTimeStampToDateTime(timeStamp);
 
                 return new CurrencyInfoFromBitfinex
