@@ -31,7 +31,14 @@ namespace ExchangeBitfinex.Services.Services
 
         public async Task AddCurrencyInfo(CurrencyInfo currencyInfo)
         {
-            await _currencyInfoRepository.Add(currencyInfo);
+            try
+            {
+                await _currencyInfoRepository.Add(currencyInfo);
+            }
+            catch(Exception e)
+            {
+                var s = e;
+            }
             await _unitOfWork.SaveAsync();
         }
 

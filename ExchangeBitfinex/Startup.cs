@@ -47,7 +47,7 @@ namespace ExchangeBitfinex
                 ServiceLifetime.Scoped
             );
 
-            var authOptions = Configuration.GetValue<AuthOptions>("AuthOptions");
+            var authOptions = Configuration.GetSection("AuthOptions").Get<AuthOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     //.AddAuthentication(o =>
                     //{
@@ -83,7 +83,7 @@ namespace ExchangeBitfinex
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddScoped<IStorageContext, ApplicationDbContext>();
+            //services.AddScoped<IStorageContext, ApplicationDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICurrencyInfoManager, CurrencyInfoManager>();
