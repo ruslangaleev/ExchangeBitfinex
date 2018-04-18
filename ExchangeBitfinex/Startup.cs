@@ -96,6 +96,14 @@ namespace ExchangeBitfinex
                     Description = "",
                     TermsOfService = ""
                 });
+
+                options.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "Пример: Bearer {токен}",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
             });
 
             services.AddScoped<IStorageContext, ApplicationDbContext>();
