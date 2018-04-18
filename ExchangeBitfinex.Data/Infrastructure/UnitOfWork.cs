@@ -14,7 +14,6 @@ namespace ExchangeBitfinex.Data.Infrastructure
         /// </summary> 
         public UnitOfWork(IStorageContext storageContext)
         {
-            //_applicationDbContext = applicationDbContext;
             _applicationDbContext = storageContext as ApplicationDbContext;
         }
 

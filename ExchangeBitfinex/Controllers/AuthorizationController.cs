@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Controllers
 {
+    /// <summary>
+    /// Контроллер по управлению авторизацией
+    /// </summary>
     [Authorize]
     [Route("api/auth")]
     public class AuthorizationController : Controller
@@ -28,17 +31,13 @@ namespace ExchangeBitfinex.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         /// <summary>
-        /// API для входа пользователя.
+        /// Контроллер
         /// </summary>
-        private readonly SignInManager<ApplicationUser> _signInManager;
-
         public AuthorizationController(IOptions<AuthOptions> options,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            UserManager<ApplicationUser> userManager)
         {
             _authOptions = options.Value;
             _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         /// <summary> 
@@ -96,7 +95,7 @@ namespace ExchangeBitfinex.Controllers
 
             return GenerateToken(user.Id.ToString(), "user");
         }
-
+        
         private AuthorizationTokenResource GenerateToken(string userId, string role)
         {
             var (generatedAccessToken, expires) = GetAccessToken(userId, role);

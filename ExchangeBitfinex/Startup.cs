@@ -34,8 +34,7 @@ namespace ExchangeBitfinex
         /// Интерфейс для получения данных окружения
         /// </summary>
         private readonly IHostingEnvironment _env;
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -61,12 +60,6 @@ namespace ExchangeBitfinex
 
             var authOptions = Configuration.GetSection("AuthOptions").Get<AuthOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    //.AddAuthentication(o =>
-                    //{
-                    //    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    //    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    //    o.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-                    //})
                     .AddJwtBearer(options =>
                     {
                         options.RequireHttpsMetadata = false;
@@ -120,27 +113,15 @@ namespace ExchangeBitfinex
                 .AddDataAnnotations()
                 .AddApiExplorer();
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseBrowserLink();
-            //    app.UseDeveloperExceptionPage();
-            //    app.UseDatabaseErrorPage();
-            //}
-            //else
-            //{
-            //    app.UseExceptionHandler("/Home/Error");
-            //}
-
             var basePath = Configuration.GetValue<string>("BasePath") ?? "";
             app.UseSwagger()
                .UseSwaggerUI(c =>
                {
                    c.RoutePrefix = "api-docs";
-                   c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "ReportOnline Dispatcher");
+                   c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "Тестовое задание");
                });
 
             app.UseStaticFiles();
@@ -156,10 +137,6 @@ namespace ExchangeBitfinex
 
             var bitfinexHandler = app.ApplicationServices.GetRequiredService<IBitfinexHandler>();
             bitfinexHandler.Start();
-
-            //new BitfinexHandler(Configuration,
-            //    serviceProvider.GetRequiredService<IBitfinexClient>(),
-            //    serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
         }
     }
 }

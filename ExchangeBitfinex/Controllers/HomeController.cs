@@ -1,17 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace ExchangeBitfinex.Controllers
 {
     public class HomeController : Controller
     {
-        [HttpGet("api")]
-        public async Task<string> Get()
+        private readonly IConfiguration _configuration;
+
+        /// <summary>
+        /// Инициирует контроллер
+        /// </summary>
+        /// <param name="configuration"></param>
+        public HomeController(IConfiguration configuration)
         {
-            return "Сервис предоставления информации о курсах валют от Bitifinex";
+            _configuration = configuration;
+        }
+
+        /// <summary>
+        /// Перенаправляет на страницу в документацией
+        /// </summary>
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var basePath = _configuration.GetValue<string>("BasePath") ?? "";
+
+            return new RedirectResult($"~{basePath}/api-docs");
         }
     }
 }

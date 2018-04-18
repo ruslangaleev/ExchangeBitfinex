@@ -26,7 +26,6 @@ namespace ExchangeBitfinex.Services.Services
         public CurrencyInfoManager(ICurrencyInfoRepository currencyInfoRepository, IUnitOfWork unitOfWork, IStorageContext storageContext)
         {
             _currencyInfoRepository = currencyInfoRepository ?? throw new ArgumentNullException(nameof(ICurrencyInfoRepository));
-            //_currencyInfoRepository = new CurrencyInfoRepository(storageContext);
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(IUnitOfWork));
         }
 

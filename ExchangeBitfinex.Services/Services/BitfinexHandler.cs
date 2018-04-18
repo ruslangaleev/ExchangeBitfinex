@@ -16,25 +16,16 @@ namespace ExchangeBitfinex.Services.Services
     {
         private readonly int _timeOutInMinutes;
 
-        //private readonly IBitfinexClient _bitfinexClient;
-
-        //private readonly ICurrencyInfoManager _currencyInfoManager;
-
         private readonly IServiceProvider _serviceProvider;
 
         public BitfinexHandler(IConfiguration configuration,
             IServiceProvider serviceProvider)
-            //IBitfinexClient bitfinexClient,
-            //ICurrencyInfoManager currencyInfoManager)
         {
             // TODO: tryparse 
             _timeOutInMinutes = int.Parse(configuration["TimeOutInMinutes"] ?? throw new ArgumentNullException("TimeOutInMinutes"));
             _serviceProvider = serviceProvider;
-            //_bitfinexClient = bitfinexClient ?? throw new ArgumentNullException(nameof(IBitfinexClient));
-            //_currencyInfoManager = currencyInfoManager ?? throw new ArgumentNullException(nameof(ICurrencyInfoManager));
         }
-
-        // TODO: Должен постоянно работать 
+        
         public void Start()
         {
             Task.Run(async () =>

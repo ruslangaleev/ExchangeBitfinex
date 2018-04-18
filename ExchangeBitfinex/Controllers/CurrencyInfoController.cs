@@ -9,18 +9,29 @@ using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Controllers
 {
-    //[Authorize]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    /// <summary>
+    /// Контроллер, предоставляющий информацию о валютах
+    /// </summary>
+    [Authorize]
     [Route("api/currency")]
     public class CurrencyInfoController : Controller
     {
         private readonly ICurrencyInfoManager _currencyInfoManager;
 
+        /// <summary>
+        /// Контроллер
+        /// </summary>
         public CurrencyInfoController(ICurrencyInfoManager currencyInfoManager)
         {
             _currencyInfoManager = currencyInfoManager ?? throw new ArgumentNullException(nameof(ICurrencyInfoManager));
         }
 
+        /// <summary>
+        /// Предоставляет информацию о валютах
+        /// </summary>
+        /// <param name="currencyType">Тип валюты: EHTUSD, BTCUSD</param>
+        /// <param name="pageNumber">Номер страницы</param>
+        /// <param name="pageSize">Количество записей на странице</param>
         [HttpGet]
         public async Task<object> GetPageList(CurrencyType currencyType, int pageNumber, int pageSize)
         {
@@ -33,6 +44,9 @@ namespace ExchangeBitfinex.Controllers
             };
         }
 
+        /// <summary>
+        /// Средний курс валюты за последние 24 часа
+        /// </summary>
         [HttpGet("avg")]
         public async Task<object> GetAvgDataLastDay()
         {

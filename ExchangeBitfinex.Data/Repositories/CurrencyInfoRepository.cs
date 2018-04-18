@@ -45,10 +45,8 @@ namespace ExchangeBitfinex.Data.Repositories
         /// </summary> 
         public CurrencyInfoRepository(IStorageContext storageContext)
         {
-            //_currencyInfos = applicationDbContext.CurrencyInfos;
             var context = storageContext as ApplicationDbContext;
             _currencyInfos = context.CurrencyInfos;
-            //_currencyInfos = context.Set<CurrencyInfo>();
         }
 
         /// <summary> 
