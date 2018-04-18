@@ -12,10 +12,10 @@ namespace ExchangeBitfinex.Data.Infrastructure
         /// <summary> 
         /// Конструктор 
         /// </summary> 
-        public UnitOfWork(ApplicationDbContext applicationDbContext)
+        public UnitOfWork(IStorageContext storageContext)
         {
-            _applicationDbContext = applicationDbContext;
-            //_applicationDbContext = storageContext as ApplicationDbContext;
+            //_applicationDbContext = applicationDbContext;
+            _applicationDbContext = storageContext as ApplicationDbContext;
         }
 
         /// <summary> 

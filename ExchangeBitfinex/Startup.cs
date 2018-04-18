@@ -30,6 +30,10 @@ namespace ExchangeBitfinex
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             var dbConnectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddEntityFrameworkSqlServer()
                 .AddDbContext<ApplicationDbContext>(options =>
@@ -79,38 +83,34 @@ namespace ExchangeBitfinex
                         };
                     });
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-            //services.AddScoped<IStorageContext, ApplicationDbContext>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IStorageContext, ApplicationDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICurrencyInfoManager, CurrencyInfoManager>();
-            services.AddScoped<IBitfinexClient, BitfinexClient>();
+            services.AddSingleton<IBitfinexClient, BitfinexClient>();
             services.AddScoped<ICurrencyInfoRepository, CurrencyInfoRepository>();
+            services.AddSingleton<IBitfinexHandler, BitfinexHandler>();
             services.Configure<AuthOptions>(Configuration.GetSection("AuthOptions"));
 
             services
                 .AddMvcCore()
                 .AddJsonFormatters()
                 .AddAuthorization();
-                //.AddApiExplorer();
+            //.AddApiExplorer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseBrowserLink();
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseBrowserLink();
+            //    app.UseDeveloperExceptionPage();
+            //    app.UseDatabaseErrorPage();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Home/Error");
+            //}
 
             app.UseStaticFiles();
 
@@ -123,9 +123,12 @@ namespace ExchangeBitfinex
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            new BitfinexHandler(Configuration,
-                serviceProvider.GetRequiredService<IBitfinexClient>(),
-                serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
+            var bitfinexHandler = app.ApplicationServices.GetRequiredService<IBitfinexHandler>();
+            bitfinexHandler.Start();
+
+            //new BitfinexHandler(Configuration,
+            //    serviceProvider.GetRequiredService<IBitfinexClient>(),
+            //    serviceProvider.GetRequiredService<ICurrencyInfoManager>()).Start();
         }
     }
 }

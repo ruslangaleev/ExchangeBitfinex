@@ -1,38 +1,53 @@
 ﻿using ExchangeBitfinex.Data.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Services.Services
 {
-    public class BitfinexHandler
+    public interface IBitfinexHandler
+    {
+        void Start();
+    }
+
+    public class BitfinexHandler : IBitfinexHandler
     {
         private readonly int _timeOutInMinutes;
 
-        private readonly IBitfinexClient _bitfinexClient;
+        //private readonly IBitfinexClient _bitfinexClient;
 
-        private readonly ICurrencyInfoManager _currencyInfoManager;
+        //private readonly ICurrencyInfoManager _currencyInfoManager;
+
+        private readonly IServiceProvider _serviceProvider;
 
         public BitfinexHandler(IConfiguration configuration,
-            IBitfinexClient bitfinexClient,
-            ICurrencyInfoManager currencyInfoManager)
+            IServiceProvider serviceProvider)
+            //IBitfinexClient bitfinexClient,
+            //ICurrencyInfoManager currencyInfoManager)
         {
             // TODO: tryparse 
             _timeOutInMinutes = int.Parse(configuration["TimeOutInMinutes"] ?? throw new ArgumentNullException("TimeOutInMinutes"));
-            _bitfinexClient = bitfinexClient ?? throw new ArgumentNullException(nameof(IBitfinexClient));
-            _currencyInfoManager = currencyInfoManager ?? throw new ArgumentNullException(nameof(ICurrencyInfoManager));
+            _serviceProvider = serviceProvider;
+            //_bitfinexClient = bitfinexClient ?? throw new ArgumentNullException(nameof(IBitfinexClient));
+            //_currencyInfoManager = currencyInfoManager ?? throw new ArgumentNullException(nameof(ICurrencyInfoManager));
         }
 
         // TODO: Должен постоянно работать 
-        public async Task Start()
+        public void Start()
         {
-            while (true)
+            Task.Run(async () =>
             {
-                await Worker();
-                Thread.Sleep((int)TimeSpan.FromMinutes(_timeOutInMinutes).TotalMilliseconds);
-            }
+                var timeSpan = TimeSpan.FromMinutes(_timeOutInMinutes);
+
+                while (true)
+                {
+                    await Worker();
+
+                    await Task.Delay(timeSpan);
+                }
+            });
         }
 
         private async Task Worker()
@@ -41,13 +56,19 @@ namespace ExchangeBitfinex.Services.Services
 
             foreach (var entry in list)
             {
-                var response = await _bitfinexClient.GetInfoCurrency(entry);
-                await _currencyInfoManager.AddCurrencyInfo(new CurrencyInfo
+                using (var serviceScope = _serviceProvider.GetService<IServiceScopeFactory>().CreateScope())
                 {
-                    CurrencyType = entry,
-                    DateTime = response.DateTime,
-                    LastPrice = response.LastPrice
-                });
+                    var _bitfinexClient = serviceScope.ServiceProvider.GetRequiredService<IBitfinexClient>();
+                    var _currencyInfoManager = serviceScope.ServiceProvider.GetRequiredService<ICurrencyInfoManager>();
+
+                    var response = await _bitfinexClient.GetInfoCurrency(entry);
+                    await _currencyInfoManager.AddCurrencyInfo(new CurrencyInfo
+                    {
+                        CurrencyType = entry,
+                        DateTime = response.DateTime,
+                        LastPrice = response.LastPrice
+                    });
+                }
             }
         }
     }

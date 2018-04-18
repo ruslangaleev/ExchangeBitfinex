@@ -23,22 +23,17 @@ namespace ExchangeBitfinex.Services.Services
         private readonly ICurrencyInfoRepository _currencyInfoRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CurrencyInfoManager(ICurrencyInfoRepository currencyInfoRepository, IUnitOfWork unitOfWork)
+        public CurrencyInfoManager(ICurrencyInfoRepository currencyInfoRepository, IUnitOfWork unitOfWork, IStorageContext storageContext)
         {
             _currencyInfoRepository = currencyInfoRepository ?? throw new ArgumentNullException(nameof(ICurrencyInfoRepository));
+            //_currencyInfoRepository = new CurrencyInfoRepository(storageContext);
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(IUnitOfWork));
         }
 
         public async Task AddCurrencyInfo(CurrencyInfo currencyInfo)
         {
-            try
-            {
-                await _currencyInfoRepository.Add(currencyInfo);
-            }
-            catch(Exception e)
-            {
-                var s = e;
-            }
+            await _currencyInfoRepository.Add(currencyInfo);
+
             await _unitOfWork.SaveAsync();
         }
 

@@ -6,7 +6,7 @@ using ExchangeBitfinex.Data.Models;
 
 namespace ExchangeBitfinex.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>//, IStorageContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IStorageContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
