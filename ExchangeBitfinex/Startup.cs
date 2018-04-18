@@ -15,17 +15,25 @@ using Microsoft.IdentityModel.Tokens;
 using ExchangeBitfinex.Resources;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using Swashbuckle.AspNetCore.Swagger;
+using System.IO;
 
 namespace ExchangeBitfinex
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
+
+        /// <summary>
+        /// Интерфейс для получения данных окружения
+        /// </summary>
+        private readonly IHostingEnvironment _env;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -83,6 +91,20 @@ namespace ExchangeBitfinex
                         };
                     });
 
+            services.AddSwaggerGen(options =>
+            {
+                var xmlPath = Path.Combine(_env.ContentRootPath, "ExchangeBitfinex.xml");
+                options.IncludeXmlComments(xmlPath);
+
+                options.SwaggerDoc("v1", new Info
+                {
+                    Title = "ReportOnline Dispatcher",
+                    Version = "v1",
+                    Description = "",
+                    TermsOfService = ""
+                });
+            });
+
             services.AddScoped<IStorageContext, ApplicationDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICurrencyInfoManager, CurrencyInfoManager>();
@@ -94,8 +116,9 @@ namespace ExchangeBitfinex
             services
                 .AddMvcCore()
                 .AddJsonFormatters()
-                .AddAuthorization();
-            //.AddApiExplorer();
+                .AddAuthorization()
+                .AddDataAnnotations()
+                .AddApiExplorer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -111,6 +134,14 @@ namespace ExchangeBitfinex
             //{
             //    app.UseExceptionHandler("/Home/Error");
             //}
+
+            var basePath = Configuration.GetValue<string>("BasePath") ?? "";
+            app.UseSwagger()
+               .UseSwaggerUI(c =>
+               {
+                   c.RoutePrefix = "api-docs";
+                   c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "ReportOnline Dispatcher");
+               });
 
             app.UseStaticFiles();
 
