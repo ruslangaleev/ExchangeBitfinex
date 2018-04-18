@@ -1,4 +1,5 @@
-﻿using ExchangeBitfinex.Models;
+﻿using ExchangeBitfinex.Documentation;
+using ExchangeBitfinex.Models;
 using ExchangeBitfinex.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,14 +17,22 @@ using System.Threading.Tasks;
 namespace ExchangeBitfinex.Controllers
 {
     /// <summary>
-    /// Контроллер по управлению авторизацией
+    /// Контроллер по управлению авторизацией.
     /// </summary>
     [Authorize]
     [Route("api/auth")]
-    public class AuthorizationController : Controller
+    public class AuthorizationController : BaseController
     {
+        #region Поля
+
+        /// <summary>
+        /// Токен обновления.
+        /// </summary>
         private static string _refreshToken;
 
+        /// <summary>
+        /// Конфигурация для JWT.
+        /// </summary>
         private readonly AuthOptions _authOptions;
 
         /// <summary>
@@ -30,8 +40,12 @@ namespace ExchangeBitfinex.Controllers
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
 
+        #endregion
+
+        #region Конструктор
+
         /// <summary>
-        /// Контроллер
+        /// Контроллер.
         /// </summary>
         public AuthorizationController(IOptions<AuthOptions> options,
             UserManager<ApplicationUser> userManager)
@@ -40,62 +54,92 @@ namespace ExchangeBitfinex.Controllers
             _userManager = userManager;
         }
 
+        #endregion
+
+        #region Методы (public)
+
         /// <summary> 
         /// Создает токен для доступа к ресурсам 
         /// </summary> 
+        /// <response code="200">Токен успешно сгенерирован.</response>
+        /// <response code="400">Ошибка получения токена.</response>
         [AllowAnonymous]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GenericFormErrorResult), (int)HttpStatusCode.BadRequest)]
         [HttpPost("token")]
         public async Task<object> GetToken([FromBody]LoginModel model)
         {
-            //if (!ModelState.IsValid)
-
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user == null)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError(nameof(model.Email), "Пользователь с указанным email не найден");
-                //throw new ModelErrorException(ModelState);
+
+                var user = await _userManager.FindByNameAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(nameof(model.Email), "Пользователь с указанным email не найден");
+
+                }
+                else
+                if (!await _userManager.CheckPasswordAsync(user, model.Password))
+                {
+                    ModelState.AddModelError(nameof(model.Password), "Пароль не верный");
+                }
+                else
+                if (!await _userManager.IsLockedOutAsync(user))
+                {
+                    return GenerateToken(user.Id, "user");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Ваша учетная запись временно заблокирована");
+                }
+
             }
 
-            var passwordIsValid = await _userManager.CheckPasswordAsync(user, model.Password);
-
-            if (!passwordIsValid)
+            return new BadRequestObjectResult(new
             {
-                ModelState.AddModelError(nameof(model.Password), "Пароль не верный");
-                //throw new ModelErrorException(ModelState);
-            }
-
-            var isLockedOut = await _userManager.IsLockedOutAsync(user);
-
-            if (!isLockedOut)
-            {
-                return GenerateToken(user.Id, "user");
-            }
-
-            ModelState.AddModelError(string.Empty, "Ваша учетная запись временно заблокирована");
-            return null;
-            //throw new ModelErrorException(ModelState);
+                Errors = GetModelState()
+            });
         }
 
         /// <summary> 
-        /// Создает новый токен для доступа к ресурсам 
+        /// Создает новый токен для доступа к ресурсам.
         /// </summary> 
-        // Example: In request header use "Bearer <refreshToken>" 
+        /// <response code="200">Токен успешно сгенерирован.</response>
+        /// <response code="400">Ошибка получения токена.</response>
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GenericFormErrorResult), (int)HttpStatusCode.BadRequest)]
         [HttpPost("refreshtoken")]
         public object RefreshToken()
         {
             var userFromClaim = User.Claims.FirstOrDefault(t => t.Type == ClaimsIdentity.DefaultNameClaimType)?.Value;
             if (userFromClaim == null)
-                return BadRequest("Не найден идентификатор пользователя");
-
-            var user = _userManager.FindByIdAsync(userFromClaim);
-            if (user == null)
             {
-                return BadRequest("Указанный пользовтаель не существует");
+                ModelState.AddModelError(string.Empty, "Не найден идентификатор пользователя");
+            }
+            else
+            {
+                var user = _userManager.FindByIdAsync(userFromClaim);
+                if (user != null)
+                {
+                    return GenerateToken(user.Id.ToString(), "user");
+                }
+
+                ModelState.AddModelError(string.Empty, "Указанный пользовтаель не существует");
             }
 
-            return GenerateToken(user.Id.ToString(), "user");
-        }
-        
+            return new BadRequestObjectResult(new
+            {
+                Errors = GetModelState()
+            });
+        } 
+
+        #endregion
+
+        #region Методы (private)
+
+        /// <summary>
+        /// Генерирует токен для доступа к ресурсам и токен обновления.
+        /// </summary>
         private AuthorizationTokenResource GenerateToken(string userId, string role)
         {
             var (generatedAccessToken, expires) = GetAccessToken(userId, role);
@@ -108,6 +152,9 @@ namespace ExchangeBitfinex.Controllers
             };
         }
 
+        /// <summary>
+        /// Генерирует токен для доступа к ресурсам.
+        /// </summary>
         private (string, TimeSpan) GetAccessToken(string userId, string role)
         {
             Claim[] claims = new Claim[]
@@ -125,11 +172,14 @@ namespace ExchangeBitfinex.Controllers
                     notBefore: now,
                     claims: claims,
                     expires: now.Add(expires),
-                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.Key)), 
+                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.Key)),
                         SecurityAlgorithms.HmacSha256));
             return (new JwtSecurityTokenHandler().WriteToken(accessToken), expires);
         }
 
+        /// <summary>
+        /// Генерирует токен обновления.
+        /// </summary>
         private string GetRefreshToken(string userId)
         {
             Claim[] claims = new Claim[]
@@ -144,11 +194,13 @@ namespace ExchangeBitfinex.Controllers
                     notBefore: now,
                     claims: claims,
                     expires: now.Add(TimeSpan.FromMinutes(30)),
-                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.Key)), 
+                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.Key)),
                         SecurityAlgorithms.HmacSha256));
             var encodedRefreshJwt = new JwtSecurityTokenHandler().WriteToken(refreshToken);
 
             return encodedRefreshJwt;
-        }
+        } 
+
+        #endregion
     }
 }

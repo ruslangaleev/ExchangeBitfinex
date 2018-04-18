@@ -1,24 +1,27 @@
-﻿using ExchangeBitfinex.Models;
+﻿using ExchangeBitfinex.Documentation;
+using ExchangeBitfinex.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace ExchangeBitfinex.Controllers
 {
     /// <summary>
-    /// Контроллер по управлению пользователями
+    /// Контроллер по управлению пользователями.
     /// </summary>
     [Route("account")]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         /// <summary>
-        /// Менеджер управления учётками
+        /// Менеджер управления учётками.
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
 
         /// <summary>
-        /// Конструктор
+        /// Конструктор.
         /// </summary>
         public AccountController(UserManager<ApplicationUser> userManager)
         {
@@ -26,26 +29,34 @@ namespace ExchangeBitfinex.Controllers
         }
 
         /// <summary>
-        /// Регистрация пользователя
+        /// Регистрация пользователя.
         /// </summary>
+        /// <response code="200">Пользователь успешно зарегистрирован.</response>
+        /// <response code="400">Ошибка регистрации пользователя.</response>
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GenericFormErrorResult), (int)HttpStatusCode.BadRequest)]
         [HttpPost("register")]
         public async Task<object> RegisterAccount([FromBody]RegisterModel model)
         {
-            //if (!ModelState.IsValid)
-            //    throw new ModelErrorException(ModelState);
-
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                return Ok("Пользователь успешно зарегистрирован");
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    return Ok($"Пользователь {model.Email} успешно зарегистрирован");
+                }
+                if (result.Errors.FirstOrDefault()?.Code == "DuplicateUserName")
+                {
+                    ModelState.AddModelError(nameof(model.Email), "Пользователь с указанным email уже зарегистрирован");
+                }
             }
-            else
+
+            return new BadRequestObjectResult(new
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest(ModelState);
-            }
+                Errors = GetModelState()
+            });
         }
     }
 }

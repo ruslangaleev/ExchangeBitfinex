@@ -91,10 +91,18 @@ namespace ExchangeBitfinex
 
                 options.SwaggerDoc("v1", new Info
                 {
-                    Title = "ReportOnline Dispatcher",
+                    Title = "Главная",
                     Version = "v1",
                     Description = "",
                     TermsOfService = ""
+                });
+
+                options.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "Пример: Bearer {токен}",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
                 });
             });
 
@@ -121,7 +129,7 @@ namespace ExchangeBitfinex
                .UseSwaggerUI(c =>
                {
                    c.RoutePrefix = "api-docs";
-                   c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "Тестовое задание");
+                   c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "Клиент биржи Bitfinex");
                });
 
             app.UseStaticFiles();
