@@ -19,7 +19,7 @@ namespace ExchangeBitfinex.Controllers
     /// <summary>
     /// Контроллер по управлению авторизацией.
     /// </summary>
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/auth")]
     public class AuthorizationController : BaseController
     {
