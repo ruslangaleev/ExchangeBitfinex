@@ -104,6 +104,8 @@ namespace ExchangeBitfinex
                     In = "header",
                     Type = "apiKey"
                 });
+
+                options.DescribeAllEnumsAsStrings();
             });
 
             services.AddScoped<IStorageContext, ApplicationDbContext>();

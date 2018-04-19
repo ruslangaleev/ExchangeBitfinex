@@ -12,9 +12,9 @@ namespace ExchangeBitfinex.Controllers
     /// <summary>
     /// Контроллер, предоставляющий информацию о валютах
     /// </summary>
-    [Authorize(Roles = "user")]
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "user")]
     [Route("api/currency")]
-    public class CurrencyInfoController : Controller
+    public class CurrencyInfoController : BaseController
     {
         private readonly ICurrencyInfoManager _currencyInfoManager;
 

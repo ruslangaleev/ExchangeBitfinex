@@ -1,5 +1,8 @@
 ﻿namespace ExchangeBitfinex.Services.Resources
 {
+    /// <summary>
+    /// Модель для отображения среднего значения валюты за указанный период
+    /// </summary>
     public class AvgData
     {
         /// <summary> 
